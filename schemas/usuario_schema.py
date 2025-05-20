@@ -4,6 +4,8 @@ from typing import List
 from pydantic import BaseModel, EmailStr
 
 
+
+
 class UsuarioSchemaBase(BaseModel):
     id: Optional[int] = None
     nome: str
@@ -17,6 +19,7 @@ class UsuarioSchemaBase(BaseModel):
 
 class UsuarioSchemaCreate(UsuarioSchemaBase):
     senha: str
+
 
 
 class UsuarioSchemaUp(UsuarioSchemaBase):
