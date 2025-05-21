@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from core.database import Session
 from core.auth import oauth2_schema
@@ -17,7 +17,7 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
-async def get_session() -> Generator:
+async def get_session() -> AsyncSession:
     session: AsyncSession = Session()
 
     try:
@@ -52,7 +52,14 @@ async def get_current_user(
         raise credential_exception
 
     async with db as session:
-        query = select(UsuarioModel).filter(UsuarioModel.id == int(token_data.username))
+        # Tenta primeiro buscar por ID (caso o sub seja um ID numérico)
+        try:
+            user_id = int(token_data.username)
+            query = select(UsuarioModel).filter(UsuarioModel.id == user_id)
+        except ValueError:
+            # Se não for um ID numérico, busca por email
+            query = select(UsuarioModel).filter(UsuarioModel.email == token_data.username)
+        
         result = await session.execute(query)
         usuario: UsuarioModel = result.scalars().unique().one_or_none()
 
