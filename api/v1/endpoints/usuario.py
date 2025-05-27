@@ -3,6 +3,7 @@ from typing import List, Optional, Any
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
+import requests
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -10,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 
 from models.usuario_model import UsuarioModel
 from schemas.usuario_schema import UsuarioSchemaBase, UsuarioSchemaCreate, UsuarioSchemaUp
+from schemas.verificacao_schema import VerificacaoExternaSchema
 from core.deps import get_session, get_current_user
 from core.security import gerar_hash_senha
 from core.auth import autenticar, criar_token_acesso
@@ -122,3 +124,35 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
                             detail='Dados de acesso incorretos.')
 
     return JSONResponse(content={"access_token": criar_token_acesso(sub=usuario.id), "token_type": "bearer"}, status_code=status.HTTP_200_OK)
+
+
+# POST Verificação Externa
+@router.post('/verificar-externo', status_code=status.HTTP_200_OK)
+async def verificar_externo(dados: VerificacaoExternaSchema):
+    try:
+        response = requests.post(
+            "https://gs2j4476z0.execute-api.us-east-1.amazonaws.com/Prod",
+            json={
+                "user": dados.user,
+                "cpf": dados.cpf,
+                "email": dados.email
+            }
+        )
+        
+        if response.status_code == 200:
+            return JSONResponse(
+                content=response.json(),
+                status_code=status.HTTP_200_OK
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Erro na verificação externa"
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao conectar com o serviço externo: {str(e)}"
+        )
+
+

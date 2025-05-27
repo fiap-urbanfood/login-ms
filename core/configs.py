@@ -5,12 +5,14 @@ from typing import ClassVar
 
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
+
     DB_URL: str = (
-        "postgresql+asyncpg://postgres.tascqincqdsjvmdjdwnh:123456@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
+        "mysql+aiomysql://urbanfood:Urbanf00dFiap@rds-mysql.c8gkm8vsq6yc.us-east-1.rds.amazonaws.com:3306/urbanfood"
     )
+    
     DBBaseModel: ClassVar = (
         declarative_base()
-    )  # Adicionando ClassVar para evitar o erro
+    )
 
     JWT_SECRET: str = "asBop3YPd4kNkLvbf_hkxjbFhnIqGmx_phMYOH2RBjM"
     """
