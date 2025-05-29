@@ -4,8 +4,12 @@ from typing import ClassVar
 
 
 class Settings(BaseSettings):
+    """
+    Configurações gerais usadas na aplicação
+    """
+    
     API_V1_STR: str = "/api/v1"
-
+    PROJECT_NAME: str = 'UrbanFood - Microserviço de Login'
     DB_URL: str = (
         "mysql+aiomysql://urbanfood:Urbanf00dFiap@rds-mysql.c8gkm8vsq6yc.us-east-1.rds.amazonaws.com:3306/urbanfood"
     )
